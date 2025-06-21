@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -164,7 +164,7 @@ const Results = () => {
                       </p>
                     </div>
                     <div className="p-4 rounded-lg bg-red-500/20 border border-red-500/30">
-                      <h4 className="font-semibold text-red-300 mb-2">Very Low (<40%)</h4>
+                      <h4 className="font-semibold text-red-300 mb-2">Very Low (&lt;40%)</h4>
                       <p className="text-sm text-gray-300">
                         Minimal likelihood of activity. Not typically shown in results.
                       </p>
