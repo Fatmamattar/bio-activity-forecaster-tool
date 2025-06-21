@@ -10,11 +10,12 @@ import BackgroundImage from "@/components/BackgroundImage";
 import { RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+// ... [imports remain unchanged]
+
 const Predictor = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  
-  // Exact features from your Gradio interface
+
   const inputFeatures = [
     { name: "4a-α-7-α-β-Nepetalactone", label: "4a-α-7-α-β-Nepetalactone", min: 0, max: 10, step: 0.1 },
     { name: "Terpinolene", label: "Terpinolene", min: 0, max: 10, step: 0.1 },
@@ -48,39 +49,41 @@ const Predictor = () => {
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    
-    // Simulate prediction API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Mock prediction results based on your Gradio interface output
-    const mockPredictions = [
-      { label: "insecticidal", confidence: 63.21 },
-      { label: "antioxidant", confidence: 60.86 },
-      { label: "antimicrobial", confidence: 54.11 },
-      { label: "antifungal", confidence: 51.17 },
-      { label: "anti-inflammatory", confidence: 48.36 },
-      { label: "antibacterial", confidence: 46.05 },
-      { label: "antitumor", confidence: 17.36 }
-    ];
-    
-    // Store data for Results page
-    const predictionData = {
-      inputs: values,
-      timestamp: new Date().toISOString(),
-      predictions: mockPredictions
-    };
-    
-    sessionStorage.setItem('predictionResults', JSON.stringify(predictionData));
-    
-    setIsLoading(false);
-    
-    toast({
-      title: "Prediction Complete",
-      description: "Redirecting to results page...",
-    });
-    
-    // Navigate to results page
-    navigate('/results');
+
+    try {
+      const response = await fetch("https://9be2e9eb0505549cf6.gradio.live/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ ...values }) // sending compound values
+      });
+
+      const result = await response.json();
+
+      const predictionData = {
+        inputs: values,
+        timestamp: new Date().toISOString(),
+        predictions: result, // assuming the response is an array of { label, confidence }
+      };
+
+      sessionStorage.setItem('predictionResults', JSON.stringify(predictionData));
+
+      toast({
+        title: "Prediction Complete",
+        description: "Redirecting to results page...",
+      });
+
+      navigate('/results');
+    } catch (error) {
+      console.error("Prediction error:", error);
+      toast({
+        title: "Prediction Failed",
+        description: "There was an error contacting the model.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
