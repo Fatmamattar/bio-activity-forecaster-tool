@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import Navigation from "@/components/Navigation";
 import BackgroundImage from "@/components/BackgroundImage";
-import { ArrowLeft, Download, Share2, TrendingUp, AlertCircle, CheckCircle } from "lucide-react";
+import { ArrowLeft, Download, Share2, TrendingUp, AlertCircle, CheckCircle, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface PredictionResult {
@@ -79,6 +78,24 @@ const Results = () => {
               Analysis completed on {new Date(predictionData.timestamp).toLocaleString()}
             </p>
           </div>
+
+          {/* Important Notice */}
+          <Card className="bg-amber-500/20 backdrop-blur-md border-amber-500/30 mb-8">
+            <CardContent className="pt-6">
+              <div className="flex items-start space-x-3">
+                <Info className="w-6 h-6 text-amber-400 mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="text-amber-300 font-semibold text-lg mb-2">Important Notice</h3>
+                  <p className="text-amber-100">
+                    These results are computational predictions based on machine learning models. 
+                    While they provide valuable insights, experimental verification through laboratory 
+                    testing is essential to confirm biological activities before any practical applications 
+                    or further research decisions.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
