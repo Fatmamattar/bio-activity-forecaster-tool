@@ -14,62 +14,64 @@ const Predictor = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Exact parameters from your original Colab code
+  // Exact features from your Gradio interface
   const inputFeatures = [
-    { name: "MaxEStateIndex", label: "MaxEStateIndex", min: 0, max: 20, step: 0.1 },
-    { name: "MinEStateIndex", label: "MinEStateIndex", min: -10, max: 5, step: 0.1 },
-    { name: "MaxAbsEStateIndex", label: "MaxAbsEStateIndex", min: 0, max: 20, step: 0.1 },
-    { name: "MinAbsEStateIndex", label: "MinAbsEStateIndex", min: 0, max: 15, step: 0.1 },
-    { name: "qed", label: "qed", min: 0, max: 1, step: 0.01 },
-    { name: "MolWt", label: "MolWt", min: 0, max: 1000, step: 1 },
-    { name: "HeavyAtomMolWt", label: "HeavyAtomMolWt", min: 0, max: 1000, step: 1 },
-    { name: "ExactMolWt", label: "ExactMolWt", min: 0, max: 1000, step: 0.1 },
-    { name: "NumValenceElectrons", label: "NumValenceElectrons", min: 0, max: 200, step: 1 },
-    { name: "NumRadicalElectrons", label: "NumRadicalElectrons", min: 0, max: 10, step: 1 }
+    { name: "4a-α-7-α-β-Nepetalactone", label: "4a-α-7-α-β-Nepetalactone", min: 0, max: 10, step: 0.1 },
+    { name: "Terpinolene", label: "Terpinolene", min: 0, max: 10, step: 0.1 },
+    { name: "α-Cymene", label: "α-Cymene", min: 0, max: 10, step: 0.1 },
+    { name: "α-pinene — (α)-pinene", label: "α-pinene — (α)-pinene", min: 0, max: 10, step: 0.1 },
+    { name: "Limonene — (L)imonene", label: "Limonene — (L)imonene", min: 0, max: 10, step: 0.1 },
+    { name: "Caryophyllene (SH)", label: "Caryophyllene (SH)", min: 0, max: 10, step: 0.1 },
+    { name: "Hexacosane", label: "Hexacosane", min: 0, max: 10, step: 0.1 },
+    { name: "(E)-Methyl Cinnamate", label: "(E)-Methyl Cinnamate", min: 0, max: 10, step: 0.1 },
+    { name: "1-methyl ethyl hexadecanoate", label: "1-methyl ethyl hexadecanoate", min: 0, max: 10, step: 0.1 },
+    { name: "d,l-trans-4-methyl-5-methoxy-1-(1-methoxy-1-isopropyl)-cyclohex-3-ene", label: "d,l-trans-4-methyl-5-methoxy-1-(1-methoxy-1-isopropyl)-cyclohex-3-ene", min: 0, max: 10, step: 0.1 }
   ];
 
   const [values, setValues] = useState<Record<string, number>>(
-    inputFeatures.reduce((acc, feature) => ({ ...acc, [feature.name]: feature.min }), {})
+    inputFeatures.reduce((acc, feature) => ({ ...acc, [feature.name]: 0 }), {})
   );
 
   const [isLoading, setIsLoading] = useState(false);
+  const [predictions, setPredictions] = useState<Array<{label: string, confidence: number}> | null>(null);
 
   const handleSliderChange = (name: string, value: number[]) => {
     setValues(prev => ({ ...prev, [name]: value[0] }));
   };
 
   const resetValues = () => {
-    setValues(inputFeatures.reduce((acc, feature) => ({ ...acc, [feature.name]: feature.min }), {}));
+    setValues(inputFeatures.reduce((acc, feature) => ({ ...acc, [feature.name]: 0 }), {}));
+    setPredictions(null);
     toast({
       title: "Values Reset",
-      description: "All input values have been reset to minimum values.",
+      description: "All input values have been cleared.",
     });
   };
 
-  const handlePredict = async () => {
+  const handleSubmit = async () => {
     setIsLoading(true);
     
     // Simulate prediction API call
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Store prediction data in sessionStorage for the results page
-    const predictionData = {
-      inputs: values,
-      timestamp: new Date().toISOString(),
-      // Mock prediction results - in real implementation, this would come from your model
-      predictions: [
-        { label: "Antimicrobial", confidence: 87.5 },
-        { label: "Antioxidant", confidence: 72.3 },
-        { label: "Anti-inflammatory", confidence: 65.8 },
-        { label: "Cytotoxic", confidence: 45.2 },
-        { label: "Antiviral", confidence: 32.1 }
-      ].filter(p => p.confidence > 30) // Only show predictions above 30% confidence
-    };
+    // Mock prediction results based on your Gradio interface output
+    const mockPredictions = [
+      { label: "insecticidal", confidence: 63.21 },
+      { label: "antioxidant", confidence: 60.86 },
+      { label: "antimicrobial", confidence: 54.11 },
+      { label: "antifungal", confidence: 51.17 },
+      { label: "anti-inflammatory", confidence: 48.36 },
+      { label: "antibacterial", confidence: 46.05 },
+      { label: "antitumor", confidence: 17.36 }
+    ];
     
-    sessionStorage.setItem('predictionResults', JSON.stringify(predictionData));
-    
+    setPredictions(mockPredictions);
     setIsLoading(false);
-    navigate('/results');
+    
+    toast({
+      title: "Prediction Complete",
+      description: "Biological activity predictions have been generated.",
+    });
   };
 
   return (
@@ -78,69 +80,113 @@ const Predictor = () => {
       <Navigation />
       
       <div className="relative z-10 pt-24 pb-16">
-        <div className="container mx-auto px-4 max-w-4xl">
+        <div className="container mx-auto px-4 max-w-6xl">
           <Card className="bg-white/10 backdrop-blur-md border-white/20">
             <CardHeader className="text-center">
-              <CardTitle className="text-3xl text-white mb-2">Biological Activity Predictor</CardTitle>
+              <CardTitle className="text-3xl text-white mb-2">Biological Activity Predictor with Confidence</CardTitle>
               <CardDescription className="text-gray-300 text-lg">
-                Adjust molecular descriptors using sliders to predict biological activities
+                Adjust chemical compound concentrations using sliders to predict biological activities
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                {inputFeatures.map((feature) => (
-                  <div key={feature.name} className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <Label htmlFor={feature.name} className="text-white font-medium">
-                        {feature.label}
-                      </Label>
-                      <span className="text-white bg-white/20 px-2 py-1 rounded text-sm">
-                        {values[feature.name].toFixed(feature.step < 1 ? 2 : 0)}
-                      </span>
+              <div className="grid lg:grid-cols-3 gap-6">
+                {/* Input Controls */}
+                <div className="lg:col-span-2 space-y-6">
+                  {inputFeatures.map((feature) => (
+                    <div key={feature.name} className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <Label htmlFor={feature.name} className="text-white font-medium text-sm">
+                          {feature.label}
+                        </Label>
+                        <span className="text-white bg-white/20 px-2 py-1 rounded text-sm min-w-[60px] text-center">
+                          {values[feature.name].toFixed(1)}
+                        </span>
+                      </div>
+                      <Slider
+                        id={feature.name}
+                        min={feature.min}
+                        max={feature.max}
+                        step={feature.step}
+                        value={[values[feature.name]]}
+                        onValueChange={(value) => handleSliderChange(feature.name, value)}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs text-gray-400">
+                        <span>{feature.min}</span>
+                        <span>{feature.max}</span>
+                      </div>
                     </div>
-                    <Slider
-                      id={feature.name}
-                      min={feature.min}
-                      max={feature.max}
-                      step={feature.step}
-                      value={[values[feature.name]]}
-                      onValueChange={(value) => handleSliderChange(feature.name, value)}
-                      className="w-full"
-                    />
-                    <div className="flex justify-between text-xs text-gray-400">
-                      <span>{feature.min}</span>
-                      <span>{feature.max}</span>
-                    </div>
+                  ))}
+                  
+                  <div className="flex gap-4 pt-6">
+                    <Button
+                      onClick={resetValues}
+                      variant="outline"
+                      className="flex-1 border-white/30 text-white hover:bg-white/20 py-3 text-base rounded-lg"
+                    >
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      Clear
+                    </Button>
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={isLoading}
+                      className="flex-1 bg-orange-600 hover:bg-orange-700 text-white py-3 text-base rounded-lg shadow-xl"
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-4 h-4 mr-2" />
+                          Submit
+                        </>
+                      )}
+                    </Button>
                   </div>
-                ))}
-              </div>
-              
-              <div className="flex flex-col sm:flex-row gap-4 pt-6">
-                <Button
-                  onClick={handlePredict}
-                  disabled={isLoading}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-6 text-lg rounded-full shadow-xl hover:shadow-blue-500/25 transition-all duration-300"
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      Predicting...
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-5 h-5 mr-2" />
-                      Predict Activities
-                    </>
-                  )}
-                </Button>
-                <Button
-                  onClick={resetValues}
-                  variant="outline"
-                  className="flex-1 sm:flex-none border-white/30 text-white hover:bg-white/20 py-6 text-lg rounded-full"
-                >
-                  <RotateCcw className="w-5 h-5 mr-2" />
-                  Reset
-                </Button>
+                </div>
+
+                {/* Output Panel */}
+                <div className="lg:col-span-1">
+                  <Card className="bg-gray-800/50 border-gray-600/50 h-full">
+                    <CardHeader>
+                      <CardTitle className="text-white text-xl">Output</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {predictions ? (
+                        <div className="space-y-3">
+                          {predictions.map((prediction) => (
+                            <div key={prediction.label} className="text-white">
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-sm">{prediction.label}:</span>
+                                <span className="text-sm font-mono">{prediction.confidence.toFixed(2)}%</span>
+                              </div>
+                              <div className="w-full bg-gray-700 rounded-full h-2">
+                                <div 
+                                  className="bg-orange-500 h-2 rounded-full transition-all duration-500" 
+                                  style={{ width: `${prediction.confidence}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-gray-400 text-center py-8">
+                          <p>Adjust the sliders and click Submit to see predictions</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Flag Button */}
+                  <Button 
+                    className="w-full mt-4 bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-lg"
+                    disabled
+                  >
+                    Flag
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
