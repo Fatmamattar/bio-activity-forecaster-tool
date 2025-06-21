@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,13 +43,6 @@ const Results = () => {
     return { variant: "outline" as const, label: "Low", icon: AlertCircle };
   };
 
-  const getProgressColor = (confidence: number) => {
-    if (confidence >= 80) return "bg-green-500";
-    if (confidence >= 60) return "bg-yellow-500";
-    if (confidence >= 40) return "bg-orange-500";
-    return "bg-red-500";
-  };
-
   if (!predictionData) {
     return (
       <div className="min-h-screen relative">
@@ -78,7 +71,6 @@ const Results = () => {
       
       <div className="relative z-10 pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-6xl">
-          {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
               Prediction Results
@@ -89,7 +81,6 @@ const Results = () => {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Main Results */}
             <div className="lg:col-span-2 space-y-6">
               <Card className="bg-white/10 backdrop-blur-md border-white/20">
                 <CardHeader>
@@ -129,7 +120,11 @@ const Results = () => {
                           />
                           <div className="flex justify-between text-sm text-gray-400">
                             <span>Confidence Level</span>
-                            <span>{prediction.confidence >= 80 ? "Very High" : prediction.confidence >= 60 ? "High" : prediction.confidence >= 40 ? "Moderate" : "Low"}</span>
+                            <span>
+                              {prediction.confidence >= 80 ? "Very High" : 
+                               prediction.confidence >= 60 ? "High" : 
+                               prediction.confidence >= 40 ? "Moderate" : "Low"}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -138,7 +133,6 @@ const Results = () => {
                 </CardContent>
               </Card>
 
-              {/* Interpretation */}
               <Card className="bg-white/10 backdrop-blur-md border-white/20">
                 <CardHeader>
                   <CardTitle className="text-xl text-white">Result Interpretation</CardTitle>
@@ -164,7 +158,7 @@ const Results = () => {
                       </p>
                     </div>
                     <div className="p-4 rounded-lg bg-red-500/20 border border-red-500/30">
-                      <h4 className="font-semibold text-red-300 mb-2">Very Low (<40%)</h4>
+                      <h4 className="font-semibold text-red-300 mb-2">Very Low (&lt;40%)</h4>
                       <p className="text-sm text-gray-300">
                         Minimal likelihood of activity. Not typically shown in results.
                       </p>
@@ -174,9 +168,7 @@ const Results = () => {
               </Card>
             </div>
 
-            {/* Sidebar */}
             <div className="space-y-6">
-              {/* Actions */}
               <Card className="bg-white/10 backdrop-blur-md border-white/20">
                 <CardHeader>
                   <CardTitle className="text-lg text-white">Actions</CardTitle>
@@ -202,7 +194,6 @@ const Results = () => {
                 </CardContent>
               </Card>
 
-              {/* Input Summary */}
               <Card className="bg-white/10 backdrop-blur-md border-white/20">
                 <CardHeader>
                   <CardTitle className="text-lg text-white">Input Summary</CardTitle>
@@ -219,7 +210,6 @@ const Results = () => {
                 </CardContent>
               </Card>
 
-              {/* Model Info */}
               <Card className="bg-white/10 backdrop-blur-md border-white/20">
                 <CardHeader>
                   <CardTitle className="text-lg text-white">Model Information</CardTitle>
