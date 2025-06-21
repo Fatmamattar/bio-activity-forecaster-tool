@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
 import BackgroundImage from "@/components/BackgroundImage";
-import { ArrowRight, Brain, Target, TrendingUp, Zap } from "lucide-react";
+import { ArrowRight, Target, TrendingUp, Zap } from "lucide-react";
 
 const Index = () => {
   return (
@@ -35,19 +35,7 @@ const Index = () => {
           </div>
 
           {/* Feature Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-            <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15 transition-all duration-300 hover:scale-105">
-              <CardHeader className="text-center">
-                <Brain className="w-12 h-12 text-blue-400 mx-auto mb-4" />
-                <CardTitle className="text-white">AI-Powered</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-gray-300 text-center">
-                  Advanced CatBoost classifier with multi-output capabilities for accurate predictions
-                </CardDescription>
-              </CardContent>
-            </Card>
-
+          <div className="grid md:grid-cols-3 gap-6 mb-16">
             <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/15 transition-all duration-300 hover:scale-105">
               <CardHeader className="text-center">
                 <Target className="w-12 h-12 text-purple-400 mx-auto mb-4" />

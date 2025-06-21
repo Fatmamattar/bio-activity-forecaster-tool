@@ -3,8 +3,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import Navigation from "@/components/Navigation";
 import BackgroundImage from "@/components/BackgroundImage";
 import { Play, RotateCcw } from "lucide-react";
@@ -14,36 +14,35 @@ const Predictor = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Based on your top 10 input features from the model
+  // Exact parameters from your original Colab code
   const inputFeatures = [
-    { name: "feature1", label: "Molecular Weight", range: "0-1000", step: 0.1 },
-    { name: "feature2", label: "LogP", range: "0-10", step: 0.1 },
-    { name: "feature3", label: "Polar Surface Area", range: "0-200", step: 0.1 },
-    { name: "feature4", label: "H-Bond Donors", range: "0-20", step: 1 },
-    { name: "feature5", label: "H-Bond Acceptors", range: "0-20", step: 1 },
-    { name: "feature6", label: "Rotatable Bonds", range: "0-50", step: 1 },
-    { name: "feature7", label: "Aromatic Rings", range: "0-10", step: 1 },
-    { name: "feature8", label: "Heteroatoms", range: "0-30", step: 1 },
-    { name: "feature9", label: "Heavy Atoms", range: "0-100", step: 1 },
-    { name: "feature10", label: "Formal Charge", range: "-5-5", step: 1 }
+    { name: "MaxEStateIndex", label: "MaxEStateIndex", min: 0, max: 20, step: 0.1 },
+    { name: "MinEStateIndex", label: "MinEStateIndex", min: -10, max: 5, step: 0.1 },
+    { name: "MaxAbsEStateIndex", label: "MaxAbsEStateIndex", min: 0, max: 20, step: 0.1 },
+    { name: "MinAbsEStateIndex", label: "MinAbsEStateIndex", min: 0, max: 15, step: 0.1 },
+    { name: "qed", label: "qed", min: 0, max: 1, step: 0.01 },
+    { name: "MolWt", label: "MolWt", min: 0, max: 1000, step: 1 },
+    { name: "HeavyAtomMolWt", label: "HeavyAtomMolWt", min: 0, max: 1000, step: 1 },
+    { name: "ExactMolWt", label: "ExactMolWt", min: 0, max: 1000, step: 0.1 },
+    { name: "NumValenceElectrons", label: "NumValenceElectrons", min: 0, max: 200, step: 1 },
+    { name: "NumRadicalElectrons", label: "NumRadicalElectrons", min: 0, max: 10, step: 1 }
   ];
 
   const [values, setValues] = useState<Record<string, number>>(
-    inputFeatures.reduce((acc, feature) => ({ ...acc, [feature.name]: 0 }), {})
+    inputFeatures.reduce((acc, feature) => ({ ...acc, [feature.name]: feature.min }), {})
   );
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleInputChange = (name: string, value: string) => {
-    const numValue = parseFloat(value) || 0;
-    setValues(prev => ({ ...prev, [name]: numValue }));
+  const handleSliderChange = (name: string, value: number[]) => {
+    setValues(prev => ({ ...prev, [name]: value[0] }));
   };
 
   const resetValues = () => {
-    setValues(inputFeatures.reduce((acc, feature) => ({ ...acc, [feature.name]: 0 }), {}));
+    setValues(inputFeatures.reduce((acc, feature) => ({ ...acc, [feature.name]: feature.min }), {}));
     toast({
       title: "Values Reset",
-      description: "All input values have been reset to 0.",
+      description: "All input values have been reset to minimum values.",
     });
   };
 
@@ -84,27 +83,33 @@ const Predictor = () => {
             <CardHeader className="text-center">
               <CardTitle className="text-3xl text-white mb-2">Biological Activity Predictor</CardTitle>
               <CardDescription className="text-gray-300 text-lg">
-                Enter molecular descriptors to predict biological activities with confidence scores
+                Adjust molecular descriptors using sliders to predict biological activities
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 {inputFeatures.map((feature) => (
-                  <div key={feature.name} className="space-y-2">
-                    <Label htmlFor={feature.name} className="text-white font-medium">
-                      {feature.label}
-                    </Label>
-                    <div className="space-y-1">
-                      <Input
-                        id={feature.name}
-                        type="number"
-                        step={feature.step}
-                        value={values[feature.name]}
-                        onChange={(e) => handleInputChange(feature.name, e.target.value)}
-                        className="bg-white/20 border-white/30 text-white placeholder-gray-300 focus:bg-white/30 focus:border-white/50"
-                        placeholder={`Range: ${feature.range}`}
-                      />
-                      <p className="text-xs text-gray-400">Range: {feature.range}</p>
+                  <div key={feature.name} className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <Label htmlFor={feature.name} className="text-white font-medium">
+                        {feature.label}
+                      </Label>
+                      <span className="text-white bg-white/20 px-2 py-1 rounded text-sm">
+                        {values[feature.name].toFixed(feature.step < 1 ? 2 : 0)}
+                      </span>
+                    </div>
+                    <Slider
+                      id={feature.name}
+                      min={feature.min}
+                      max={feature.max}
+                      step={feature.step}
+                      value={[values[feature.name]]}
+                      onValueChange={(value) => handleSliderChange(feature.name, value)}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-gray-400">
+                      <span>{feature.min}</span>
+                      <span>{feature.max}</span>
                     </div>
                   </div>
                 ))}
