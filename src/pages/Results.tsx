@@ -21,7 +21,7 @@ const Results = () => {
 
   if (!results) return null;
 
-  const formatPrediction = (prediction: any) => {
+  const formatPrediction = (prediction: any): string => {
     if (typeof prediction === 'string') {
       return prediction;
     } else if (Array.isArray(prediction)) {
@@ -65,7 +65,7 @@ const Results = () => {
                   {Object.entries(results.inputs || {}).map(([feature, value]) => (
                     <div key={feature} className="flex justify-between text-sm mb-1">
                       <span className="text-gray-300">{feature}:</span>
-                      <span className="text-blue-300">{value}</span>
+                      <span className="text-blue-300">{String(value)}</span>
                     </div>
                   ))}
                 </div>
