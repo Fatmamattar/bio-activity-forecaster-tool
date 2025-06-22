@@ -1,11 +1,12 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
 import BackgroundImage from "@/components/BackgroundImage";
-import { GRADIO_API_URL } from "@/constants";
+import { COLAB_MODEL_URL } from "@/constants";
 
 const inputFeatures = [
   "4a-α-7-α-β-Nepetalactone",
@@ -41,29 +42,56 @@ const Predictor = () => {
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
-      // Gather values in the correct order as required by Gradio
-      const inputArray = inputFeatures.map(name => values[name]);
-      const response = await fetch(GRADIO_API_URL, {
+      // Prepare features array in the correct order
+      const featuresArray = inputFeatures.map(name => values[name]);
+      
+      console.log("Sending prediction request to Colab model...", featuresArray);
+      
+      const response = await fetch(COLAB_MODEL_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: inputArray })
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          features: featuresArray
+        })
       });
 
-      if (!response.ok) throw new Error(`Server error: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`Model server error: ${response.status} ${response.statusText}`);
+      }
+      
       const modelOutput = await response.json();
+      console.log("Received model response:", modelOutput);
 
-      // Gradio returns { data: [result] }, where result is the model output text
+      if (modelOutput.status === "error") {
+        throw new Error(modelOutput.error || "Model prediction failed");
+      }
+
+      // Store results for the Results page
       sessionStorage.setItem(
         "predictionResults",
         JSON.stringify({
           inputs: values,
-          predictions: modelOutput.data?.[0] ?? "",
-          timestamp: Date.now()
+          predictions: modelOutput.prediction || modelOutput,
+          timestamp: Date.now(),
+          modelSource: "Google Colab"
         })
       );
+      
+      toast({ 
+        title: "Prediction Complete", 
+        description: "Model prediction successful! Redirecting to results..." 
+      });
+      
       navigate("/results");
     } catch (error: any) {
-      toast({ title: "Prediction failed", description: error.message });
+      console.error("Prediction error:", error);
+      toast({ 
+        title: "Prediction Failed", 
+        description: `Error: ${error.message}. Make sure your Colab model is running and accessible.`,
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -78,11 +106,14 @@ const Predictor = () => {
           <Card className="bg-white/10 backdrop-blur-md border-white/20">
             <CardHeader className="text-center">
               <CardTitle className="text-3xl text-white">Biological Activity Predictor</CardTitle>
+              <p className="text-gray-300 text-sm mt-2">
+                Connected to your Google Colab model
+              </p>
             </CardHeader>
             <CardContent className="space-y-6">
               {inputFeatures.map(feature => (
                 <div key={feature} className="flex justify-between items-center">
-                  <span className="text-gray-200">{feature}</span>
+                  <span className="text-gray-200 text-sm">{feature}</span>
                   <input
                     type="range"
                     min={0}
@@ -92,15 +123,19 @@ const Predictor = () => {
                     onChange={e => handleSliderChange(feature, [parseFloat(e.target.value)])}
                     className="mx-4 w-48"
                   />
-                  <span className="text-gray-400">{values[feature]}</span>
+                  <span className="text-gray-400 min-w-[3rem] text-right">{values[feature].toFixed(1)}</span>
                 </div>
               ))}
-              <div className="flex justify-end space-x-4">
+              <div className="flex justify-end space-x-4 pt-4">
                 <Button onClick={resetValues} variant="outline" disabled={isLoading}>
                   Reset
                 </Button>
-                <Button onClick={handleSubmit} disabled={isLoading}>
-                  {isLoading ? "Predicting..." : "Predict"}
+                <Button 
+                  onClick={handleSubmit} 
+                  disabled={isLoading}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+                >
+                  {isLoading ? "Predicting..." : "Predict with Colab Model"}
                 </Button>
               </div>
             </CardContent>
