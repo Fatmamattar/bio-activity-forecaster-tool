@@ -48,7 +48,7 @@ const Predictor = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("https://9be2e9eb0505549cf6.gradio.live/", {
+      const response = await fetch("https://13a06b831c8b2e5813.gradio.live/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
