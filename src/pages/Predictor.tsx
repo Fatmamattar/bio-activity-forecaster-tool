@@ -137,4 +137,25 @@ const Predictor = () => {
                   <Button
                     onClick={handleSubmit}
                     disabled={isLoading}
-                    className="flex-1 bg
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-8 text-lg font-semibold rounded-lg shadow-xl transform hover:scale-105 transition-all duration-300"
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Processing...
+                      </>
+                    ) : (
+                      "Submit"
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Predictor;
