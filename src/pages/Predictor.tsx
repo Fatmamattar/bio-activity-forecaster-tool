@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,8 +8,6 @@ import Navigation from "@/components/Navigation";
 import BackgroundImage from "@/components/BackgroundImage";
 import { RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-// ... [imports remain unchanged]
 
 const Predictor = () => {
   const navigate = useNavigate();
@@ -56,15 +53,15 @@ const Predictor = () => {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ ...values }) // sending compound values
+        body: JSON.stringify({ ...values })
       });
 
-      const result = await response.json();
+      const result = await response.json(); // result is expected to be an array of {label, confidence}
 
       const predictionData = {
         inputs: values,
         timestamp: new Date().toISOString(),
-        predictions: result, // assuming the response is an array of { label, confidence }
+        predictions: result
       };
 
       sessionStorage.setItem('predictionResults', JSON.stringify(predictionData));
@@ -90,7 +87,7 @@ const Predictor = () => {
     <div className="min-h-screen relative">
       <BackgroundImage />
       <Navigation />
-      
+
       <div className="relative z-10 pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-4xl">
           <Card className="bg-white/10 backdrop-blur-md border-white/20">
@@ -127,7 +124,7 @@ const Predictor = () => {
                     </div>
                   </div>
                 ))}
-                
+
                 <div className="flex gap-4 pt-6">
                   <Button
                     onClick={resetValues}
@@ -140,25 +137,4 @@ const Predictor = () => {
                   <Button
                     onClick={handleSubmit}
                     disabled={isLoading}
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-8 text-lg font-semibold rounded-lg shadow-xl transform hover:scale-105 transition-all duration-300"
-                  >
-                    {isLoading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Processing...
-                      </>
-                    ) : (
-                      "Submit"
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default Predictor;
+                    className="flex-1 bg
