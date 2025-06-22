@@ -16,7 +16,7 @@ const Results = () => {
     } else {
       navigate("/predictor");
     }
-  }, []);
+  }, [navigate]);
 
   if (!results) return null;
 
@@ -32,16 +32,14 @@ const Results = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-gray-200 text-sm">
-                <strong>Timestamp:</strong> {new Date(results.timestamp).toLocaleString()}
+                <strong>Timestamp:</strong> {results.timestamp ? new Date(results.timestamp).toLocaleString() : ''}
               </div>
-
               <div className="text-gray-300">
                 <h3 className="text-xl font-semibold text-white mb-2">Model Output:</h3>
                 <pre className="bg-black/40 p-4 rounded-md text-sm text-green-300 overflow-x-auto">
-                  {JSON.stringify(results.predictions, null, 2)}
+                  {results.predictions}
                 </pre>
               </div>
-
               <Button
                 className="mt-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white"
                 onClick={() => navigate("/predictor")}
