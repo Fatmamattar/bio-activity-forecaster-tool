@@ -1,35 +1,31 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
 import BackgroundImage from "@/components/BackgroundImage";
-import { RotateCcw } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { GRADIO_API_URL } from "@/constants";
 
-const GRADIO_API_URL = "https://13a06b831c8b2e5813.gradio.live/";
+const inputFeatures = [
+  "4a-α-7-α-β-Nepetalactone",
+  "Terpinolene",
+  "α-Cymene",
+  "α-pinene — (α)-pinene",
+  "Limonene — (L)imonene",
+  "Caryophyllene (SH)",
+  "Hexacosane",
+  "(E)-Methyl Cinnamate",
+  "1-methyl ethyl hexadecanoate",
+  "d,l-trans-4-methyl-5-methoxy-1-(1-methoxy-1-isopropyl)-cyclohex-3-ene"
+];
 
 const Predictor = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const inputFeatures = [
-    { name: "4a-α-7-α-β-Nepetalactone", label: "4a-α-7-α-β-Nepetalactone", min: 0, max: 10, step: 0.1 },
-    { name: "Terpinolene", label: "Terpinolene", min: 0, max: 10, step: 0.1 },
-    { name: "α-Cymene", label: "α-Cymene", min: 0, max: 10, step: 0.1 },
-    { name: "α-pinene — (α)-pinene", label: "α-pinene — (α)-pinene", min: 0, max: 10, step: 0.1 },
-    { name: "Limonene — (L)imonene", label: "Limonene — (L)imonene", min: 0, max: 10, step: 0.1 },
-    { name: "Caryophyllene (SH)", label: "Caryophyllene (SH)", min: 0, max: 10, step: 0.1 },
-    { name: "Hexacosane", label: "Hexacosane", min: 0, max: 10, step: 0.1 },
-    { name: "(E)-Methyl Cinnamate", label: "(E)-Methyl Cinnamate", min: 0, max: 10, step: 0.1 },
-    { name: "1-methyl ethyl hexadecanoate", label: "1-methyl ethyl hexadecanoate", min: 0, max: 10, step: 0.1 },
-    { name: "d,l-trans-4-methyl-5-methoxy-1-(1-methoxy-1-isopropyl)-cyclohex-3-ene", label: "d,l-trans-4-methyl-5-methoxy-1-(1-methoxy-1-isopropyl)-cyclohex-3-ene", min: 0, max: 10, step: 0.1 }
-  ];
-
   const [values, setValues] = useState<Record<string, number>>(
-    inputFeatures.reduce((acc, feature) => ({ ...acc, [feature.name]: 0 }), {})
+    inputFeatures.reduce((acc, feature) => ({ ...acc, [feature]: 0 }), {})
   );
   const [isLoading, setIsLoading] = useState(false);
 
@@ -38,39 +34,36 @@ const Predictor = () => {
   };
 
   const resetValues = () => {
-    setValues(inputFeatures.reduce((acc, feature) => ({ ...acc, [feature.name]: 0 }), {}));
+    setValues(inputFeatures.reduce((acc, feature) => ({ ...acc, [feature]: 0 }), {}));
     toast({ title: "Values Reset", description: "All input values have been cleared." });
   };
 
   const handleSubmit = async () => {
     setIsLoading(true);
-
     try {
+      // Gather values in the correct order as required by Gradio
+      const inputArray = inputFeatures.map(name => values[name]);
       const response = await fetch(GRADIO_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values)
+        body: JSON.stringify({ data: inputArray })
       });
 
       if (!response.ok) throw new Error(`Server error: ${response.status}`);
       const modelOutput = await response.json();
 
-      // Store everything in session for Results page
+      // Gradio returns { data: [result] }, where result is the model output text
       sessionStorage.setItem(
         "predictionResults",
         JSON.stringify({
           inputs: values,
-          timestamp: new Date().toISOString(),
-          predictions: modelOutput
+          predictions: modelOutput.data?.[0] ?? "",
+          timestamp: Date.now()
         })
       );
-
-      toast({ title: "Prediction Complete", description: "Redirecting to results..." });
       navigate("/results");
-
-    } catch (err) {
-      console.error("Prediction failed:", err);
-      toast({ title: "Prediction Failed", description: "Unable to connect to the model." });
+    } catch (error: any) {
+      toast({ title: "Prediction failed", description: error.message });
     } finally {
       setIsLoading(false);
     }
@@ -81,47 +74,33 @@ const Predictor = () => {
       <BackgroundImage />
       <Navigation />
       <div className="relative z-10 pt-24 pb-16">
-        <div className="container mx-auto px-4 max-w-4xl">
+        <div className="container mx-auto px-4 max-w-3xl">
           <Card className="bg-white/10 backdrop-blur-md border-white/20">
             <CardHeader className="text-center">
-              <CardTitle className="text-3xl text-white mb-2">
-                Biological Activity Predictor with Confidence
-              </CardTitle>
-              <CardDescription className="text-gray-300 text-lg">
-                Adjust compound concentrations and get real output from the model.
-              </CardDescription>
+              <CardTitle className="text-3xl text-white">Biological Activity Predictor</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {inputFeatures.map(feature => (
-                <div key={feature.name} className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor={feature.name} className="text-white font-medium text-sm">
-                      {feature.label}
-                    </Label>
-                    <span className="text-white bg-white/20 px-2 py-1 rounded text-sm min-w-[60px] text-center">
-                      {values[feature.name].toFixed(1)}
-                    </span>
-                  </div>
-                  <Slider
-                    id={feature.name}
-                    min={feature.min}
-                    max={feature.max}
-                    step={feature.step}
-                    value={[values[feature.name]]}
-                    onValueChange={(val) => handleSliderChange(feature.name, val)}
-                    className="w-full"
+                <div key={feature} className="flex justify-between items-center">
+                  <span className="text-gray-200">{feature}</span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={10}
+                    step={0.1}
+                    value={values[feature]}
+                    onChange={e => handleSliderChange(feature, [parseFloat(e.target.value)])}
+                    className="mx-4 w-48"
                   />
-                  <div className="flex justify-between text-xs text-gray-400">
-                    <span>{feature.min}</span><span>{feature.max}</span>
-                  </div>
+                  <span className="text-gray-400">{values[feature]}</span>
                 </div>
               ))}
-              <div className="flex gap-4 pt-6">
-                <Button onClick={resetValues} variant="outline" className="...">
-                  <RotateCcw className="w-4 h-4 mr-2" /> Clear
+              <div className="flex justify-end space-x-4">
+                <Button onClick={resetValues} variant="outline" disabled={isLoading}>
+                  Reset
                 </Button>
-                <Button onClick={handleSubmit} disabled={isLoading} className="...">
-                  {isLoading ? <> <div className="animate-spin ..."></div> Processing... </> : "Submit"}
+                <Button onClick={handleSubmit} disabled={isLoading}>
+                  {isLoading ? "Predicting..." : "Predict"}
                 </Button>
               </div>
             </CardContent>
